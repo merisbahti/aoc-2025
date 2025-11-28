@@ -1,6 +1,8 @@
 (ns aoc-2025.day1
-  (:require [clojure.test :refer [is testing deftest]] [clojure.string :as str] [clojure.java.io :as io] )
-)
+  (:require
+   [clojure.test :refer [is testing deftest]]
+   [clojure.string :as str]
+   [clojure.java.io :as io]))
 
 (def filename (->
                *file*
