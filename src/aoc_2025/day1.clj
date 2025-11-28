@@ -4,12 +4,13 @@
    [clojure.string :as str]
    [clojure.java.io :as io]))
 
-(def filename (->
-               *file*
-               (str/split  #"/")
-               (last)
-               (str/split  #"\.")
-               (first)))
+(def filename
+  (->
+   *file*
+   (str/split  #"/")
+   (last)
+   (str/split  #"\.")
+   (first)))
 
 (def input (slurp (io/resource "day1.txt")))
 
