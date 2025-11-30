@@ -2,19 +2,13 @@
   (:require
    [clojure.test :refer [is testing deftest]]
    [clojure.string :as str]
-   [clojure.java.io :as io]))
+   [clojure.java.io :as io]
+   [aoc-2025.core :refer [get-input-for-day filename]]))
 
-(def filename
-  (->
-   *file*
-   (str/split  #"/")
-   (last)
-   (str/split  #"\.")
-   (first)))
-
-(def input (slurp (io/resource "day1.txt")))
+(def input (get-input-for-day))
+(comment (get-input-for-day))
 
 (deftest part1-test
   (testing "Part 1"
     (is (= 7 (+ 3 4)))
-    (is (= 5 (+ 2 2)))))
+    (is (= 5 (+ 2 3)))))
