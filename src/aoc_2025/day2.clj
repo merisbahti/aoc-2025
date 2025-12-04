@@ -1,4 +1,4 @@
-(ns aoc-2025.template
+(ns aoc-2025.day2
   (:require
    [clojure.string :as str]
    [clojure.test :refer [is testing deftest]]

@@ -3,23 +3,22 @@
    [aoc-2025.core :refer [get-input-for-day]]
    [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]))
+
 (def testinput "987654321111111
 811111111111119
 234234234234278
 818181911112111
 ")
+
 (def input (get-input-for-day))
 
-(filter
- #(> (:index %) 0)
- '({:number 9, :index 1} {:number 8, :index 0}))
 (defn highest-joltage [input-string]
   (let* [indexed (->>
                   (str/split input-string #"")
                   (map-indexed (fn [i x] {:number (parse-long x) :index i})))
          sorted-by-number (sort-by (comp - :number) indexed)]
         (loop [curr-list sorted-by-number]
-          (assert (not (empty? curr-list)))
+          (assert (seq curr-list))
 
           (let* [curr-head (first curr-list)
                  remaining-list   (filter #(> (:index %) (:index curr-head)) sorted-by-number)
