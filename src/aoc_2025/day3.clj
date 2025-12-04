@@ -27,8 +27,8 @@
                 (if second-highest-number
                   (parse-long (str (:number curr-head) (:number second-highest-number)))
                   (recur (rest curr-list)))))))
-(deftest input-tests
-  (testing "part 1"
+(deftest highest-joltage-tests
+  (testing "highest-joltage"
     (is (=  99 (highest-joltage "991234")))
     (is (=  89 (highest-joltage "89")))
     (is (=  89 (highest-joltage "819")))
@@ -36,11 +36,16 @@
 
 (comment (highest-joltage "123495"))
 
-(defn sol1 [input] nil)
+(defn sol1 [input]
+  (->>
+   (str/split input #"\n")
+   (map highest-joltage)
+   (reduce +)))
 (defn sol2 [input] nil)
 
 (deftest input-tests
   (testing "part 1"
-    (is (=  nil (sol1 testinput)))
-    (is (=  nil (sol1 input)))
-    (is (=  nil (sol2 input)))))
+    (is (= 357 (sol1 testinput)))
+    (is (= 17427 (sol1 input)))
+    (is (= nil (sol2 testinput)))
+    (is (= nil (sol2 input)))))

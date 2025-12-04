@@ -17,6 +17,17 @@ L99
 R14
 L82")
 
+(defn count-zeros [start diff]
+  (let [factor (if (neg? diff) -1 1)]
+    (loop [curr start
+           remaining (abs diff)
+           zeros 0]
+      (let* [new-curr (mod (+ curr factor) 100)]
+            (if (= remaining 0) zeros
+                (recur new-curr
+                       (- remaining 1)
+                       (+ zeros (if (= new-curr 0) 1 0))))))))
+
 (defn sol1 [input] (->> (str/split input #"\n")
                         (map
                          (fn [row]
@@ -50,17 +61,6 @@ L82")
                         (:zeros)))
 
 (mod -10 100)
-
-(defn count-zeros [start diff]
-  (let [factor (if (neg? diff) -1 1)]
-    (loop [curr start
-           remaining (abs diff)
-           zeros 0]
-      (let* [new-curr (mod (+ curr factor) 100)]
-            (if (= remaining 0) zeros
-                (recur new-curr
-                       (- remaining 1)
-                       (+ zeros (if (= new-curr 0) 1 0))))))))
 
 (deftest input-tests
   (testing "part 1"
