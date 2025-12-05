@@ -83,4 +83,4 @@
     (is (= 357 (sol1 testinput)))
     (is (= 17427 (sol1 input)))
     (is (= 3121910778619 (sol2 testinput)))
-    (is (= nil (sol2 input)))))
+    (is (= 173161749617495 (sol2 input)))))
