@@ -58,10 +58,10 @@
            (if (>= (count next-acc) MAX_BANK_SIZE)
              (->> next-acc (map :number) (apply str) (parse-long))
              (recur  next-acc))))))
-(conj [] 1)
+
 (deftest highest-joltage-2-tests
   (testing "highest-joltage-2"
-    (is (=  1 (highest-joltage-2 "12" 2)))
+    (is (=  12 (highest-joltage-2 "12" 2)))
     (is (=  987654321111 (highest-joltage-2 "987654321111111" 12)))
     (is (=  811111111119 (highest-joltage-2 "811111111119" 12)))
     (is (=  434234234278 (highest-joltage-2 "234234234234278" 12)))
