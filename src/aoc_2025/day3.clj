@@ -35,40 +35,52 @@
     (is (=  89 (highest-joltage "819")))
     (is (=  11 (highest-joltage "1111")))))
 
-(def MAX_BANK_SIZE 12)
-
-(defn highest-joltage-2 [input-string]
-  (let* [indexed (->>
-                  (str/split input-string #"")
-                  (map-indexed (fn [i x] {:number (parse-long x) :index i})))
-         sorted-by-number (sort-by (juxt (comp - :number) :index) indexed)]
-        (loop [curr-list sorted-by-number
-               acc []]
-          (assert (seq curr-list))
-          (let* [curr-head (first curr-list)
-                 remaining-list   (filter #(> (:index %) (:index curr-head)) sorted-by-number)
-                 second-highest-number (first remaining-list)]
-                (if (>= (count acc) MAX_BANK_SIZE)
-                  (->> acc (map :number) (apply str) (parse-long))
-                  (recur remaining-list (cons second-highest-number remaining-list)))))))
-
+(defn highest-joltage-2 [input-string MAX_BANK_SIZE]
+  (let*
+   [indexed (->>
+             (str/split input-string #"")
+             (map-indexed (fn [i x] {:number (parse-long x) :index i})))
+    sorted-by-number (sort-by (juxt (comp - :number) :index) indexed)]
+   (loop [acc []]
+     (let* [curr-last (last acc)
+            remaining-items (- MAX_BANK_SIZE (count acc))
+            candidate
+            (first
+             (filter
+              #(and
+                (not (some (partial = %) acc)) ;; is not in acc list
+                (or (nil? curr-last) (> (:index %) (:index curr-last))) ;; is higher index than last
+                (>= (- (count sorted-by-number) (:index %)) remaining-items) ;; has more items left
+                )
+              sorted-by-number))
+            next-acc (conj  acc candidate)]
+           (assert candidate)
+           (if (>= (count next-acc) MAX_BANK_SIZE)
+             (->> next-acc (map :number) (apply str) (parse-long))
+             (recur  next-acc))))))
+(conj [] 1)
 (deftest highest-joltage-2-tests
   (testing "highest-joltage-2"
-    (is (=  987654321111 (highest-joltage-2 "987654321111111")))
-    (is (=  811111111119 (highest-joltage-2 "811111111111119")))))
-
-(comment (highest-joltage "123495"))
+    (is (=  1 (highest-joltage-2 "12" 2)))
+    (is (=  987654321111 (highest-joltage-2 "987654321111111" 12)))
+    (is (=  811111111119 (highest-joltage-2 "811111111119" 12)))
+    (is (=  434234234278 (highest-joltage-2 "234234234234278" 12)))
+    (is (=  888911112111 (highest-joltage-2 "818181911112111" 12)))))
 
 (defn sol1 [input]
   (->>
    (str/split input #"\n")
    (map highest-joltage)
    (reduce +)))
-(defn sol2 [input] nil)
+(defn sol2 [input]
+  (->>
+   (str/split input #"\n")
+   (map #(highest-joltage-2 % 12))
+   (reduce +)))
 
 (deftest input-tests
   (testing "part 1"
     (is (= 357 (sol1 testinput)))
     (is (= 17427 (sol1 input)))
-    (is (= nil (sol2 testinput)))
+    (is (= 3121910778619 (sol2 testinput)))
     (is (= nil (sol2 input)))))
