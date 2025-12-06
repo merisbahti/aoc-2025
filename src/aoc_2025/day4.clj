@@ -22,12 +22,11 @@
    [1 -1] [1 0] [1 1]])
 
 (defn count-neighbors [[x y] full]
-  {:pre [(set? full)]} ;; :pre is the optimized way to assert in Clojure
+  {:pre [(set? full)]}
   (->> neighbor-deltas
-       (filter (fn [[dx dy]]
-                 ;; FAST: direct hash lookup
-                 ;; This asks: "Does 'full' contain this coordinate?"
-                 (full [(+ x dx) (+ y dy)])))
+       (filter
+        (fn [[dx dy]]
+          (full [(+ x dx) (+ y dy)])))
        count))
 
 (comment (count-neighbors [0 0] (into #{} [[0 1] [0 2] [0 -1] [0 0]]))
@@ -45,7 +44,7 @@
         (reduce into #{})
         (filter (complement nil?))
         (set)) x
-    (map #(time (count-neighbors % x)) x)
+    (map #(count-neighbors % x) x)
     (filter #(< % 4) x)
     (count x)))
 
