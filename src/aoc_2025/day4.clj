@@ -17,9 +17,10 @@
 (def input (get-input-for-day))
 
 (def neighbor-deltas
-  [[-1 -1] [-1 0] [-1 1]
-   [0 -1]        [0 1]
-   [1 -1] [1 0] [1 1]])
+  (for [dx (range -1 2)
+        dy (range -1 2)
+        :when (not= [dx dy] [0 0])]
+    [dx dy]))
 
 (defn count-neighbors [[x y] full]
   {:pre [(set? full)]}
