@@ -49,11 +49,32 @@
     (filter #(< % 4) x)
     (count x)))
 
-(defn sol2 [input] nil)
+(defn sol2 [input]
+  (as->
+   (->> (str/split input #"\n")
+        (map #(str/split % #""))
+        (map-indexed
+         (fn [y row]
+           (map-indexed (fn [x col] (when (= "@" col) [x y])) row)))
+        (reduce into #{})
+        (filter (complement nil?))
+        (set)) board
+
+    (loop [board-acc board
+           changed true]
+      (if changed
+        (let [new-board
+              (->> board-acc
+                   (filter
+                    (fn [pos]
+                      (>= (count-neighbors pos board-acc) 4)))
+                   set)]
+          (recur new-board (not= new-board board-acc)))
+        (- (count board) (count board-acc))))))
 
 (deftest input-tests
   (testing "part 1"
-    (is (= (sol1 testinput) 13))
-    (is (= (sol1 input) 1428))
-    (is (= (sol2 testinput) nil))
-    (is (= (sol2 input) nil))))
+    (is (=  13 (sol1 testinput)))
+    (is (=  1428 (sol1 input)))
+    (is (=  43 (sol2 testinput)))
+    (is (=  8936 (sol2 input)))))
