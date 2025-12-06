@@ -60,7 +60,6 @@
     (fn
       [[{head-start :start head-end :end :as head} & tail :as acc]
        {curr-start :start curr-end :end :as curr}]
-      (println head curr)
       (cond
         (nil? head-start) (cons curr acc)
         (and

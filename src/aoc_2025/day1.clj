@@ -49,11 +49,7 @@ L82")
                            (let* [sum (+  latest curr)
                                   new-latest (mod sum 100)
 
-                                  new-zeros (+ zeros  (count-zeros latest curr))
-
-                                  _ (println {:latest latest :curr curr :sum sum :new-latest new-latest
-
-                                              :new-zeros new-zeros})]
+                                  new-zeros (+ zeros  (count-zeros latest curr))]
                                  {:latest new-latest
                                   :zeros new-zeros}))
 
