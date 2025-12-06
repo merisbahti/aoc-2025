@@ -12,7 +12,7 @@
 
 (deftest input-tests
   (testing "part 1"
-    (is (= (sol1 testinput) nil))
-    (is (= (sol1 input) nil))
-    (is (= (sol2 testinput) nil))
-    (is (= (sol2 input) nil))))
+    (is (= nil (sol1 testinput)))
+    (is (= nil (sol1 input)))
+    (is (= nil (sol2 testinput)))
+    (is (= nil (sol2 input)))))
