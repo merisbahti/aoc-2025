@@ -56,8 +56,6 @@ L82")
                          {:latest 50 :zeros 0})
                         (:zeros)))
 
-(mod -10 100)
-
 (deftest input-tests
   (testing "part 1"
     (is (= 3 (sol1 testinput)))
