@@ -12,51 +12,43 @@
 
 (def input (get-input-for-day))
 
-(defn sol1 [input] (->>
-                    (str/split input #"\n")
-                    (map str/trim)
-                    (map #(str/split % #"\s+"))
-                    (map (fn [items]
-                           (map (fn [value]
-                                  (cond
-                                    (= value "*") *
-                                    (= value "+") +
-                                    :else (parse-long value))) items)))
-                    (reduce (fn [acc curr]
-                              (map cons curr acc))
-                            (repeat []))
+(defn sol1 [input]
+  (->>
+   (str/split input #"\n")
+   (map str/trim)
+   (map #(str/split % #"\s+"))
+   (map (fn [items]
+          (map (fn [value]
+                 (cond
+                   (= value "*") *
+                   (= value "+") +
+                   :else (parse-long value))) items)))
+   (reduce (fn [acc curr]
+             (map cons curr acc))
+           (repeat []))
 
-                    (map eval)
-                    (apply +)))
-(parse-long (str/trim (str/replace "1  *" "*" "")))
+   (map eval)
+   (apply +)))
 
 (defn sol2 [input]
   (let [rows  (str/split input #"\n")
         column-indexes (range 0 (apply max (map count rows)))]
 
     (->>
-     (reduce
-      (fn [acc index]
-        (let [string (str/trim (apply str (map #(get % index) rows)))]
-          (cons string acc)))
-
-      []  column-indexes)
+     (map
+      (fn [index]
+        (str/trim (apply str (map #(get % index) rows))))
+      column-indexes)
+     (reverse)
 
      (reduce
       (fn [{sum :sum stack :stack :as acc} string]
-        (println {:acc acc :string string})
         (cond
-          (= "" (str/trim string))
-          acc
-          (str/ends-with? string "*")
-          {:sum
-
-           (+ sum
-              (apply *
-                     (cons
-                      (parse-long (str/trim (str/replace string "*" ""))) stack)))
-           :stack []}
-          (str/ends-with? string "+") {:sum  (+ sum (apply + (cons (parse-long (str/trim (str/replace string "+" ""))) stack))) :stack []}
+          (= "" (str/trim string)) acc
+          (str/ends-with? string "*") {:sum (+ sum (apply * (cons (parse-long (str/trim (str/replace string "*" ""))) stack)))
+                                       :stack []}
+          (str/ends-with? string "+") {:sum  (+ sum (apply + (cons (parse-long (str/trim (str/replace string "+" ""))) stack)))
+                                       :stack []}
           :else {:sum sum :stack (cons (parse-long string) stack)}))
 
       {:sum 0 :stack []})
