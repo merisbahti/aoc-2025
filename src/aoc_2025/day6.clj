@@ -28,40 +28,43 @@
 
                     (map eval)
                     (apply +)))
+(parse-long (str/trim (str/replace "1  *" "*" "")))
 
-(defn get-col-lengths [input]
-  (->
-   (str/split input #"\n")
-   (last)
-   (str/split #"")
-   (#(loop [curr-nrs []
-            remaining %]
-       (let [head-char (str (first remaining))
-             rest-char (apply str (rest remaining))
-             [head-acc & rest-acc :as acc] curr-nrs]
+(defn sol2 [input]
+  (let [rows  (str/split input #"\n")
+        column-indexes (range 0 (apply max (map count rows)))]
 
-         (cond
-           (= remaining "")      (reverse curr-nrs)
-           (not= head-char " ")  (recur (cons head-char acc) rest-char)
-           (= head-char " ")     (recur (cons (str "x" head-acc) rest-acc) rest-char)
-           :else (assert false "Unhandled case")))))
-   (#(let [rows %]
-       (map-indexed (fn [i col] (- (count col) (if (= (+ 1 i) (count rows)) 0 1))) rows)))
-   (#(take 10000 %))))
-(assert (= (get-col-lengths testinput) '(3 3 3 3)))
-(assert (= (get-col-lengths "+ +  +  ") '(1 2 3)))
-(assert (= (take 7 (get-col-lengths input)) '(3 4 3 4 2 2 2)))
+    (->>
+     (reduce
+      (fn [acc index]
+        (let [string (str/trim (apply str (map #(get % index) rows)))]
+          (cons string acc)))
 
-(->>
- (str/split testinput #"\n")
- (map str/trim)
- (map #(str/split % #"\s+")))
+      []  column-indexes)
 
-(defn sol2 [input] nil)
+     (reduce
+      (fn [{sum :sum stack :stack :as acc} string]
+        (println {:acc acc :string string})
+        (cond
+          (= "" (str/trim string))
+          acc
+          (str/ends-with? string "*")
+          {:sum
+
+           (+ sum
+              (apply *
+                     (cons
+                      (parse-long (str/trim (str/replace string "*" ""))) stack)))
+           :stack []}
+          (str/ends-with? string "+") {:sum  (+ sum (apply + (cons (parse-long (str/trim (str/replace string "+" ""))) stack))) :stack []}
+          :else {:sum sum :stack (cons (parse-long string) stack)}))
+
+      {:sum 0 :stack []})
+     (:sum))))
 
 (deftest input-tests
   (testing "part 1"
     (is (= 4277556 (sol1 testinput)))
     (is (= 4951502530386 (sol1 input)))
-    (is (= nil (sol2 testinput)))
-    (is (= nil (sol2 input)))))
+    (is (= 3263827 (sol2 testinput)))
+    (is (= 8486156119946 (sol2 input)))))
