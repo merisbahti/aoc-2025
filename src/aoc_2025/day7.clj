@@ -116,7 +116,6 @@
        (drop 1)
        (into [])
        ((fn [graph]
-          (println "is graph" graph)
           (count-paths (first (first graph)) 0 graph)))))
 
 (time (count-paths 7 1 [#{}
