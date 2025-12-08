@@ -42,11 +42,11 @@
   (str/split testinput #"\n")
   (map #(map parse-long (str/split %  #",")))
   ((fn [points]
-     (let [sorted-pairwise
+     (let [point-distances
            (->>
             (combo/combinations points 2)
             (map (fn [[p1 p2]] [(dist p1 p2) p1 p2])))]
-       sorted-pairwise
+       point-distances
        ;; (loop [circuits []]
        ;;   (let [flat-circuits (reduce cons [] circuits)]
 
