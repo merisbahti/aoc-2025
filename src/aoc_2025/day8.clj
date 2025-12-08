@@ -27,6 +27,7 @@
 862,61,35
 984,92,344
 425,690,689")
+
 (def input (get-input-for-day))
 
 (defn dist [point1 point2]
@@ -42,18 +43,25 @@
   (str/split testinput #"\n")
   (map #(map parse-long (str/split %  #",")))
   ((fn [points]
-     (let [point-distances
+     (let [init-point-distances
            (->>
             (combo/combinations points 2)
             (map (fn [[p1 p2]] [(dist p1 p2) p1 p2])))]
-       point-distances
-       ;; (loop [circuits []]
-       ;;   (let [flat-circuits (reduce cons [] circuits)]
-
-       ;;     (if (= (count points) (count flat-circuits))
-       ;;       circuits
-       ;;       (recur [points]))))
-       )))))
+       (loop [iters 0
+              circuits []
+              point-distances init-point-distances]
+         (println (count circuits) (count point-distances))
+         (if (or (> iters 1000) (empty? point-distances))
+           circuits
+           (let [[_ min-p1 min-p2] (apply (partial min-key first) point-distances)]
+             (recur (+ 1 iters)
+                    (cons min-p2 (cons min-p1 circuits))
+                    (filter (fn [[_ p1 p2]]
+                              (and (not= p1 min-p1)
+                                   (not= p1 min-p2)
+                                   (not= p2 min-p1)
+                                   (not= p2 min-p2)))
+                            point-distances))))))))))
 
 (assert (= (dist [1 1 0] [2 2 0]) (math/sqrt 2)))
 (assert (= (dist [1 1 1] [2 2 2]) (math/sqrt 3)))
@@ -62,8 +70,6 @@
 
 (defn sol1 [input] nil)
 (defn sol2 [input] nil)
-
-(mapcat identity (chunked [1 2 3] 1))
 
 (deftest input-tests
   (testing "part 1"
