@@ -41,7 +41,7 @@
 (defn add-to-circuits [p1 p2 circuits]
   (loop [[head & tail :as remaining] circuits
          acc []]
-    (cond (empty? remaining) (conj acc #{p1 p2})
+    (cond (empty? remaining) (concat acc [#{p1 p2}])
           (or (head p1) (head p2))
           (concat [(into head [p1 p2])] acc tail)
           :else (recur tail (cons head acc)))))
@@ -50,44 +50,40 @@
   (testing "part 1"
     (is (= [#{1 3 5 7} #{2}] (add-to-circuits 3 1 [#{2} #{1 5 7}])))
     (is (= [#{1 3} #{2 5 7}] (add-to-circuits 3 1 [#{2 5 7} #{1}])))
+    (is (= [#{3 2} #{1}] (add-to-circuits 3 2 [#{2} #{1}])))
     (is (= [#{3 2} #{1}] (add-to-circuits 3 2 [#{2} #{1}])))))
 
 (time
  (->>
-  (str/split testinput #"\n")
+  (str/split input #"\n")
   (map #(map parse-long (str/split %  #",")))
   ((fn [points]
      (let [point-distances
            (->>
             (combo/combinations points 2)
             (map (fn [[p1 p2]] [(dist p1 p2) p1 p2])))]
+
        (loop [iters 0
               circuits []
-              remaining-points (set points)]
-         (println (count remaining-points) iters)
-         (assert (set? remaining-points))
+              remaining-point-distances point-distances]
          (assert (< iters (count points)))
-         (if (or (>= iters (/ (count points) 2)) (empty? remaining-points))
+         (if (>= iters (/ (count points) 2))
            circuits
-           (let [[_ min-p1 min-p2]
-                 (->> point-distances
-                      (filter
-                       (fn [[_ p1 p2]]
-                         (or
-                          (remaining-points p1)
-                          (remaining-points p2))))
+           (let [[_ min-p1 min-p2 :as min-points]
+                 (->> remaining-point-distances
                       (apply
-                       (partial min-key first)))]
+                       (partial min-key first)))
+                 new-circuits (add-to-circuits min-p1 min-p2 circuits)
+                 added (not= (apply + (map count new-circuits))
+                             (apply + (map count circuits)))]
 
-             (recur (+ 1 iters)
-                    (add-to-circuits min-p1 min-p2 circuits)
-                    (set
-                     (filter
-                      (fn [point] (and (not= point min-p1)
-                                       (not= point min-p2)))
-                      remaining-points)))))))))
-
-  (map count)))
+             (recur (+ (if added 1 0) iters)
+                    new-circuits
+                    (filter (partial not= min-points) remaining-point-distances))))))))
+  (map count)
+  (sort-by -)
+  (take 3)
+  (apply *)))
 
 (assert (= (dist [1 1 0] [2 2 0]) (math/sqrt 2)))
 (assert (= (dist [1 1 1] [2 2 2]) (math/sqrt 3)))
