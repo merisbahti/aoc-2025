@@ -12,7 +12,7 @@
 (defn sol1 [input]
   (->> (str/split input #"\s*,\s*")
        (map (fn [range] (let [[min max] (str/split range #"-")] [(parse-long (str/trim min)) (parse-long (str/trim max))])))
-       (map (fn [[min max]] (when (or (not (number? min)) (not (number? max))) (throw "hello")) (range min (+ 1 max))))
+       (map (fn [[min max]] (assert (and (number? min) (number? max))) (range min (+ 1 max))))
        (flatten)
        (filter (fn [num] (let* [strnum (str num)
                                 strlen (count strnum)
@@ -39,8 +39,8 @@
 
 (defn sol2 [input]
   (->> (str/split input #"\s*,\s*")
-       (map (fn [range] (let [[min max] (str/split range #"-")] [nil (parse-long (str/trim max))])))
-       (map (fn [[min max]] (assert (and (number? min) (number? max)))  (range min (+ 1 max))))
+       (map (fn [range] (let [[min max] (str/split range #"-")] [(parse-long (str/trim min)) (parse-long (str/trim max))])))
+       (map (fn [[min max]]   (range min (+ 1 max))))
        (flatten)
        (filter
         (fn [row] (some (partial apply =) (all-string-permutations row))))
