@@ -43,15 +43,16 @@
   (str/split testinput #"\n")
   (map #(map parse-long (str/split %  #",")))
   ((fn [points]
-     (let [init-point-distances
+     (let [point-distances
            (->>
             (combo/combinations points 2)
             (map (fn [[p1 p2]] [(dist p1 p2) p1 p2])))]
        (loop [iters 0
               circuits []
-              point-distances init-point-distances]
+              point-distances point-distances]
          (println (count circuits) (count point-distances))
-         (if (or (> iters 1000) (empty? point-distances))
+         (assert (< iters (count points)))
+         (if (empty? point-distances)
            circuits
            (let [[_ min-p1 min-p2] (apply (partial min-key first) point-distances)]
              (recur (+ 1 iters)
