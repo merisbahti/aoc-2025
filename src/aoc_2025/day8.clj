@@ -36,13 +36,6 @@
    (map (fn [x] (math/pow x 2)))
    (apply +)
    (math/sqrt)))
-(defn chunked [size seq]
-  (loop
-   [acc []
-    remaining seq]
-    (if (not-empty remaining)
-      (recur  (cons (take size remaining) acc) (drop size remaining))
-      acc)))
 
 (time
  (->>
@@ -52,9 +45,7 @@
      (let [sorted-pairwise
            (->>
             (combo/combinations points 2)
-            (chunked 1000)
-            (pmap (fn [chunk] (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]) chunk)))
-            (mapcat identity))]
+            (map (fn [[p1 p2]] [(dist p1 p2) p1 p2])))]
        sorted-pairwise
        ;; (loop [circuits []]
        ;;   (let [flat-circuits (reduce cons [] circuits)]
