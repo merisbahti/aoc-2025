@@ -38,7 +38,7 @@
    (apply +)
    (math/sqrt)))
 
-(defn add-to-circuits [p1 p2 circuits]
+(defn connect-circuits [p1 p2 circuits]
   (loop [[head & tail :as remaining] circuits
          acc []]
     (cond (empty? remaining) (concat acc [#{p1 p2}])
@@ -48,36 +48,45 @@
 
 (deftest add-to-circuits-test
   (testing "part 1"
-    (is (= [#{1 3 5 7} #{2}] (add-to-circuits 3 1 [#{2} #{1 5 7}])))
-    (is (= [#{1 3} #{2 5 7}] (add-to-circuits 3 1 [#{2 5 7} #{1}])))
-    (is (= [#{3 2} #{1}] (add-to-circuits 3 2 [#{2} #{1}])))
-    (is (= [#{3 2} #{1}] (add-to-circuits 3 2 [#{2} #{1}])))))
+    (is (= [#{1 3 5 7} #{2}] (connect-circuits 3 1 [#{2} #{1 5 7}])))
+    (is (= [#{1 3} #{2 5 7}] (connect-circuits 3 1 [#{2 5 7} #{1}])))
+    (is (= [#{3 2} #{1}] (connect-circuits 3 2 [#{2} #{1}])))
+    (is (= [#{3 2} #{1}] (connect-circuits 3 2 [#{2} #{1}])))))
+
+(time (->>
+       (str/split input #"\n")
+       (map #(map parse-long (str/split %  #",")))
+       ((fn [points]
+          (let [point-distances
+                (->>
+                 (combo/combinations points 2)
+                 (map (partial apply dist))
+                 (sort))]
+
+            (count point-distances))))))
 
 (time
  (println (->>
-           (str/split testinput #"\n")
+           (str/split input #"\n")
            (map #(map parse-long (str/split %  #",")))
            ((fn [points]
               (let [point-distances
                     (->>
                      (combo/combinations points 2)
-                     (map (fn [[p1 p2]] [(dist p1 p2) p1 p2])))
+                     (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
+                     (sort-by first))
                     max-iters (case (count points)
-                                20 6
+                                20 10
                                 1000 1000)]
 
                 (loop [iters 0
                        circuits []
-                       remaining-point-distances point-distances]
+                       [[_ min-p1 min-p2 :as min-points] & remaining-point-distances] point-distances]
                   (println iters "/" max-iters)
 
                   (if (>= iters max-iters)
                     circuits
-                    (let [[_ min-p1 min-p2 :as min-points]
-                          (->> remaining-point-distances
-                               (apply
-                                (partial min-key first)))
-                          new-circuits (add-to-circuits min-p1 min-p2 circuits)
+                    (let [new-circuits (connect-circuits min-p1 min-p2 circuits)
                           added (not= (apply + (map count new-circuits))
                                       (apply + (map count circuits)))]
 
