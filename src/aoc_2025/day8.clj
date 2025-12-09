@@ -40,73 +40,93 @@
 
 (defn connect-circuits [p1 p2 circuits]
   (loop [[head & tail :as remaining] circuits
+         p1-circuit nil
+         p2-circuit nil
          acc []]
-    (cond (empty? remaining) (concat acc [#{p1 p2}])
-          (or (head p1) (head p2))
-          (concat [(into head [p1 p2])] acc tail)
-          :else (recur tail (cons head acc)))))
+    (cond (and p1-circuit p2-circuit) (let [new-circuit (into p1-circuit p2-circuit)]
+                                        {:circuits (concat acc (list new-circuit) remaining) :changed true})
+          (empty? remaining) (assert false (str "Could not find circuits to connect: " (seq p1) " and " (seq p2) " with "))
+          (and (head p1) (head p2))
+          {:circuits circuits :changed false}
+          (head p1) (recur tail head p2-circuit acc)
+          (head p2) (recur tail p1-circuit head acc)
+          :else (recur tail p1-circuit p2-circuit (cons head acc)))))
 
 (deftest add-to-circuits-test
   (testing "part 1"
-    (is (= [#{1 3 5 7} #{2}] (connect-circuits 3 1 [#{2} #{1 5 7}])))
-    (is (= [#{1 3} #{2 5 7}] (connect-circuits 3 1 [#{2 5 7} #{1}])))
-    (is (= [#{3 2} #{1}] (connect-circuits 3 2 [#{2} #{1}])))
-    (is (= [#{3 2} #{1}] (connect-circuits 3 2 [#{2} #{1}])))))
-
-(time (->>
-       (str/split input #"\n")
-       (map #(map parse-long (str/split %  #",")))
-       ((fn [points]
-          (let [point-distances
-                (->>
-                 (combo/combinations points 2)
-                 (map (partial apply dist))
-                 (sort))]
-
-            (count point-distances))))))
+    (is (= {:changed true, :circuits [#{1 2}]}					 (connect-circuits 1 2 [#{2} #{1}])))
+    (is (= {:changed true, :circuits [#{1 2 3 5 7 8}]}					 (connect-circuits 1 2 [#{2 7 8} #{1 3 5}])))))
 
 (time
- (println (->>
-           (str/split input #"\n")
-           (map #(map parse-long (str/split %  #",")))
-           ((fn [points]
-              (let [point-distances
-                    (->>
-                     (combo/combinations points 2)
-                     (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
-                     (sort-by first))
-                    max-iters (case (count points)
-                                20 10
-                                1000 1000)]
+ (print (->>
+         (str/split input #"\n")
+         (map #(map parse-long (str/split %  #",")))
+         ((fn [points]
+            (let [point-distances
+                  (->>
+                   (combo/combinations points 2)
+                   (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
+                   (sort-by first))
+                  max-iters (case (count points)
+                              20 20
+                              1000 1000)]
 
-                (loop [iters 0
-                       circuits []
-                       [[_ min-p1 min-p2 :as min-points] & remaining-point-distances] point-distances]
-                  (println iters "/" max-iters)
+              (loop [iters 0
+                     circuits (map (fn [point] (set [point])) points)
+                     [[_ min-p1 min-p2] & remaining-point-distances] point-distances]
 
-                  (if (>= iters max-iters)
-                    circuits
-                    (let [new-circuits (connect-circuits min-p1 min-p2 circuits)
-                          added (not= (apply + (map count new-circuits))
-                                      (apply + (map count circuits)))]
+                (if (>= iters max-iters)
+                  circuits
+                  (let [{new-circuits :circuits  added :changed}
+                        (connect-circuits min-p1 min-p2 circuits)]
 
-                      (recur (+ (if added 1 0) iters)
-                             new-circuits
-                             (filter (partial not= min-points) remaining-point-distances))))))))
-           (map count)
-           (sort-by -))))
+                    (recur (+ (if added 1 1) iters)
+                           new-circuits
+                           remaining-point-distances)))))))
+         (map count)
+         (sort-by -)
+         (take 3))))
 
 (assert (= (dist [1 1 0] [2 2 0]) (math/sqrt 2)))
 (assert (= (dist [1 1 1] [2 2 2]) (math/sqrt 3)))
 (assert (= (dist [1 2 3] [2 3 4]) (math/sqrt 3)))
 (assert (= (dist [0 0 0] [0 0 0]) 0.0))
 
-(defn sol1 [input] nil)
+(defn sol1 [input] (->>
+                    (str/split input #"\n")
+                    (map #(map parse-long (str/split %  #",")))
+                    ((fn [points]
+                       (let [point-distances
+                             (->>
+                              (combo/combinations points 2)
+                              (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
+                              (sort-by first))
+                             max-iters (case (count points)
+                                         20 10
+                                         1000 1000)]
+
+                         (loop [iters 0
+                                circuits (map (fn [point] (set [point])) points)
+                                [[_ min-p1 min-p2] & remaining-point-distances] point-distances]
+
+                           (if (>= iters max-iters)
+                             circuits
+                             (let [{new-circuits :circuits  added :changed}
+                                   (connect-circuits min-p1 min-p2 circuits)]
+
+                               (recur (+ (if added 1 1) iters)
+                                      new-circuits
+                                      remaining-point-distances)))))))
+                    (map count)
+                    (sort-by -)
+                    (take 3)
+                    (apply *)))
+
 (defn sol2 [input] nil)
 
 (deftest input-tests
   (testing "part 1"
-    (is (= nil (sol1 testinput)))
-    (is (= nil (sol1 input)))
+    (is (= 40 (sol1 testinput)))
+    (is (= 122430 (sol1 input)))
     (is (= nil (sol2 testinput)))
     (is (= nil (sol2 input)))))
