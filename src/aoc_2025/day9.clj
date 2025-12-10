@@ -27,28 +27,24 @@
                                 (+ 1 (abs (- x1 x2)))
                                 (+ 1 (abs (- y1 y2))))))
                         (apply max)))
-(->> (str/split "ahaha#hahaha#" #"")
-     (map-indexed (comp identity list))
-     (mapcat (fn [[i x]] (when (= x "#") [i]))))
+
 (->> testinput
      (str/split-lines)
      (map #(str/split % #","))
      (map (fn [[x y]] [(parse-long x) (parse-long y)]))
      ((fn [points]
-        (let [max-y (apply max (map second points))
-              ys (range 0 (inc max-y))
-              allowed-x-ranges
-              (reduce
-               (fn [{curr-xs :curr-xs x-ranges :x-ranges} y]
-                 (let
-                  [new-xs
-                   (filter (fn [point] (= y (second point))) points)]
+        (let [sorted-by-ys (->> (sort-by (juxt second first) points) (into []))
+              x-ranges (->> (map
+                             (fn [i]
+                               (let [[low-x low-y] (get sorted-by-ys (* 2 i))
+                                     [high-x high-y] (get sorted-by-ys (inc (* 2 i)))]
+                                 (assert (= low-y high-y))
+                                 [low-y [low-x high-x]]))
 
-                   {:curr-xs curr-xs :x-ranges (comp new-xs x-ranges)}))
+                             (range 0 (+  (/ (count points) 2))))
+                            (into {}))]
 
-               {:curr-xs [nil nil] :x-ranges []} ys)]
-
-          ys))))
+          x-ranges))))
 
 (defn sol2 [input] nil)
 
