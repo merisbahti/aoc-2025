@@ -44,18 +44,18 @@
          p2-circuit nil
          acc []]
     (cond (and p1-circuit p2-circuit) (let [new-circuit (into p1-circuit p2-circuit)]
-                                        {:circuits (concat acc (list new-circuit) remaining) :changed true})
+                                        (concat acc (list new-circuit) remaining))
           (empty? remaining) (assert false (str "Could not find circuits to connect: " (seq p1) " and " (seq p2) " with "))
           (and (head p1) (head p2))
-          {:circuits circuits :changed false}
+          circuits
           (head p1) (recur tail head p2-circuit acc)
           (head p2) (recur tail p1-circuit head acc)
           :else (recur tail p1-circuit p2-circuit (cons head acc)))))
 
 (deftest add-to-circuits-test
   (testing "part 1"
-    (is (= {:changed true, :circuits [#{1 2}]}					 (connect-circuits 1 2 [#{2} #{1}])))
-    (is (= {:changed true, :circuits [#{1 2 3 5 7 8}]}					 (connect-circuits 1 2 [#{2 7 8} #{1 3 5}])))))
+    (is (= [#{1 2}]					 (connect-circuits 1 2 [#{2} #{1}])))
+    (is (= [#{1 2 3 5 7 8}]					 (connect-circuits 1 2 [#{2 7 8} #{1 3 5}])))))
 
 (time
  (print (->>
@@ -77,10 +77,10 @@
 
                 (if (>= iters max-iters)
                   circuits
-                  (let [{new-circuits :circuits  added :changed}
+                  (let [new-circuits
                         (connect-circuits min-p1 min-p2 circuits)]
 
-                    (recur (+ (if added 1 1) iters)
+                    (recur (+ 1 iters)
                            new-circuits
                            remaining-point-distances)))))))
          (map count)
@@ -111,10 +111,10 @@
 
                            (if (>= iters max-iters)
                              circuits
-                             (let [{new-circuits :circuits  added :changed}
+                             (let [new-circuits
                                    (connect-circuits min-p1 min-p2 circuits)]
 
-                               (recur (+ (if added 1 1) iters)
+                               (recur (+ 1 iters)
                                       new-circuits
                                       remaining-point-distances)))))))
                     (map count)
@@ -122,7 +122,27 @@
                     (take 3)
                     (apply *)))
 
-(defn sol2 [input] nil)
+(defn sol2 [input] (->>
+                    (str/split input #"\n")
+                    (map #(map parse-long (str/split %  #",")))
+                    ((fn [points]
+                       (let [point-distances
+                             (->>
+                              (combo/combinations points 2)
+                              (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
+                              (sort-by first))]
+
+                         (loop [iters 0
+                                circuits (map (fn [point] (set [point])) points)
+                                [[_ min-p1 min-p2] & remaining-point-distances] point-distances]
+
+                           (let [new-circuits
+                                 (connect-circuits min-p1 min-p2 circuits)]
+                             (if (= 2 (count circuits))
+                               [min-p1 min-p2]
+                               (recur (+ 1 iters)
+                                      new-circuits
+                                      remaining-point-distances)))))))))
 
 (deftest input-tests
   (testing "part 1"
