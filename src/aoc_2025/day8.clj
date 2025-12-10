@@ -92,57 +92,59 @@
 (assert (= (dist [1 2 3] [2 3 4]) (math/sqrt 3)))
 (assert (= (dist [0 0 0] [0 0 0]) 0.0))
 
-(defn sol1 [input] (->>
-                    (str/split input #"\n")
-                    (map #(map parse-long (str/split %  #",")))
-                    ((fn [points]
-                       (let [point-distances
-                             (->>
-                              (combo/combinations points 2)
-                              (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
-                              (sort-by first))
-                             max-iters (case (count points)
-                                         20 10
-                                         1000 1000)]
+(defn sol1 [input]
+  (->>
+   (str/split input #"\n")
+   (map #(map parse-long (str/split %  #",")))
+   ((fn [points]
+      (let [point-distances
+            (->>
+             (combo/combinations points 2)
+             (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
+             (sort-by first))
+            max-iters (case (count points)
+                        20 10
+                        1000 1000)]
 
-                         (loop [iters 0
-                                circuits (map (fn [point] (set [point])) points)
-                                [[_ min-p1 min-p2] & remaining-point-distances] point-distances]
+        (loop [iters 0
+               circuits (map (fn [point] (set [point])) points)
+               [[_ min-p1 min-p2] & remaining-point-distances] point-distances]
 
-                           (if (>= iters max-iters)
-                             circuits
-                             (let [new-circuits
-                                   (connect-circuits min-p1 min-p2 circuits)]
+          (if (>= iters max-iters)
+            circuits
+            (let [new-circuits
+                  (connect-circuits min-p1 min-p2 circuits)]
 
-                               (recur (+ 1 iters)
-                                      new-circuits
-                                      remaining-point-distances)))))))
-                    (map count)
-                    (sort-by -)
-                    (take 3)
-                    (apply *)))
+              (recur (+ 1 iters)
+                     new-circuits
+                     remaining-point-distances)))))))
+   (map count)
+   (sort-by -)
+   (take 3)
+   (apply *)))
 
-(defn sol2 [input] (->>
-                    (str/split input #"\n")
-                    (map #(map parse-long (str/split %  #",")))
-                    ((fn [points]
-                       (let [point-distances
-                             (->>
-                              (combo/combinations points 2)
-                              (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
-                              (sort-by first))]
+(defn sol2 [input]
+  (->>
+   (str/split input #"\n")
+   (map #(map parse-long (str/split %  #",")))
+   ((fn [points]
+      (let [point-distances
+            (->>
+             (combo/combinations points 2)
+             (map (fn [[p1 p2]] [(dist p1 p2) p1 p2]))
+             (sort-by first))]
 
-                         (loop [iters 0
-                                circuits (map (fn [point] (set [point])) points)
-                                [[_ min-p1 min-p2] & remaining-point-distances] point-distances]
+        (loop [iters 0
+               circuits (map (fn [point] (set [point])) points)
+               [[_ min-p1 min-p2] & remaining-point-distances] point-distances]
 
-                           (let [new-circuits
-                                 (connect-circuits min-p1 min-p2 circuits)]
-                             (if (= 2 (count circuits))
-                               [min-p1 min-p2]
-                               (recur (+ 1 iters)
-                                      new-circuits
-                                      remaining-point-distances)))))))))
+          (let [new-circuits
+                (connect-circuits min-p1 min-p2 circuits)]
+            (if (= 2 (count circuits))
+              [min-p1 min-p2]
+              (recur (+ 1 iters)
+                     new-circuits
+                     remaining-point-distances)))))))))
 
 (deftest input-tests
   (testing "part 1"
