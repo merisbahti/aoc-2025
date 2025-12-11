@@ -11,9 +11,14 @@
 
 (defn sol1 [input]
   (->> (str/split input #"\s*,\s*")
-       (map (fn [range] (let [[min max] (str/split range #"-")] [(parse-long (str/trim min)) (parse-long (str/trim max))])))
-       (map (fn [[min max]] (assert (and (number? min) (number? max))) (range min (+ 1 max))))
-       (flatten)
+       (mapcat
+        (fn [range-str]
+          (let
+           [[min-value max-value]
+            (map
+             (comp parse-long str/trim)
+             (str/split range-str #"-"))]
+            (range min-value (+ 1 max-value)))))
        (filter (fn [num] (let* [strnum (str num)
                                 strlen (count strnum)
                                 half-strlen (/ strlen 2)
@@ -24,26 +29,18 @@
                                      (take half-strlen (drop half-strlen strnum)))))))
        (apply +)))
 
-; given abcdef should give '(a b c d e f) '(ab cd ef) '(abc def) '(abcd ef)
-(defn all-string-permutations [input]
-  (let*  [inputstr (str input)
-          half-len (long (/ (count inputstr) 2))
-          all-lengths (range 1 (+ 1 half-len))]
-         (map
-          (fn [len]
-            (->> (take-while
-                  #(< % (count inputstr))
-                  (map-indexed (fn [x i] (* i x)) (repeat len)))
-                 (map (fn [start-index] (apply str (take len (drop start-index inputstr)))))))
-          all-lengths)))
-
 (defn sol2 [input]
   (->> (str/split input #"\s*,\s*")
-       (map (fn [range] (let [[min max] (str/split range #"-")] [(parse-long (str/trim min)) (parse-long (str/trim max))])))
-       (map (fn [[min max]]   (range min (+ 1 max))))
-       (flatten)
+       (mapcat
+        (fn [range-str]
+          (let
+           [[min-value max-value]
+            (map
+             (comp parse-long str/trim)
+             (str/split range-str #"-"))]
+            (range min-value (+ 1 max-value)))))
        (filter
-        (fn [row] (some (partial apply =) (all-string-permutations row))))
+        (fn [row] (re-matches #"(.*)\1+" (str row))))
        (apply +)))
 
 (deftest input-tests
@@ -51,5 +48,4 @@
     (is (= (sol1 testinput) 1227775554))
     (is (= (sol1 input) 24157613387))
     (time (is (= (sol2 testinput) 4174379265)))
-    ;; (is (= (sol2 input) 33832678380))
-    ))
+    (time (is (= (sol2 input) 33832678380)))))
