@@ -36,11 +36,40 @@ iii: out")
        (into {})
        (find-paths [:you])
        (count)))
-(defn sol2 [input] nil)
+
+(def test-input-2 "svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out
+")
+(def dacset #{:dac})
+(def fftset #{:fft})
+(defn filterfn [path] (and (some dacset  path) (some fftset path)))
+
+(defn sol2 [input]
+  (->> (str/split-lines input)
+       (map (fn [line]
+              (let [[key & valuestring] (str/split line #": ")
+                    values (str/split (first valuestring) #" ")]
+                [(keyword key) (map keyword values)])))
+       (into {})
+       (find-paths [:svr])
+       (filter filterfn)
+       (count)))
 
 (deftest input-tests
   (testing "part 1"
     (is (= 5 (sol1 testinput)))
     (is (= 413 (sol1 input)))
-    (is (= nil (sol2 testinput)))
-    (is (= nil (sol2 input)))))
+    (is (= 2 (sol2 test-input-2)))
+    ;; (is (= nil (sol2 input)))
+    ))
