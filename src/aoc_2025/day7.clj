@@ -118,16 +118,6 @@
        ((fn [graph]
           (count-paths (first (first graph)) 0 graph)))))
 
-(time (count-paths 7 1 [#{}
-                        #{7}
-                        #{6 8}
-                        #{7 9 5}
-                        #{4 6 10 8}
-                        #{7 3 11 9 5 8}
-                        #{7 4 6 12 2 10 8}
-                        #{7 1 4 13 3 11 5 10 8}
-                        #{0 4 6 12 2 11 14 10 8}]))
-
 (deftest input-tests
   (testing "part 1"
     (is (= 21 (sol1 testinput)))

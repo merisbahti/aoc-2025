@@ -47,5 +47,5 @@
   (testing "part 1"
     (is (= (sol1 testinput) 1227775554))
     (is (= (sol1 input) 24157613387))
-    (time (is (= (sol2 testinput) 4174379265)))
-    (time (is (= (sol2 input) 33832678380)))))
+    (is (= (sol2 testinput) 4174379265))
+    (is (= (sol2 input) 33832678380))))
