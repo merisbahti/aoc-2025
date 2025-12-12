@@ -17,15 +17,15 @@ iii: out")
 
 (def input (get-input-for-day))
 
-(defn find-paths [[head-path :as curr-path] graph]
-  (assert (not= nil head-path))
-  (let [paths (head-path graph)]
-    (if (nil? paths)
-      [(reverse curr-path)]
-      (mapcat
-       (fn [k]
-         (find-paths (cons k curr-path) graph))
-       paths))))
+(def find-paths (fn [[head-path :as curr-path] graph]
+                  (assert (not= nil head-path))
+                  (let [paths (head-path graph)]
+                    (if (nil? paths)
+                      [(reverse curr-path)]
+                      (mapcat
+                       (fn [k]
+                         (find-paths (cons k curr-path) graph))
+                       paths)))))
 
 (defn sol1 [input]
   (->> (str/split-lines input)

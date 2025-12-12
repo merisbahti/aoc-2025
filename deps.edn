@@ -1,0 +1,19 @@
+{:paths ["src" "resources"]
+
+ :deps {org.clojure/clojure {:mvn/version "1.12.3"}
+        org.clojure/math.combinatorics {:mvn/version "0.3.0"}
+        org.clojure/spec.alpha {:mvn/version "0.5.238"}}
+
+ :aliases
+ {:repl {:main-opts ["-e" "(require 'aoc-2025.core)" "-r"]
+         ;; or if using nrepl:
+         ;; :exec-fn clojure.main/repl
+         ;; :exec-args {:init-ns aoc-2025.core
+         }
+ :test {:extra-paths ["src"]
+        :extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+        :main-opts ["-m" "cognitect.test-runner"]
+        :exec-fn cognitect.test-runner.api/test
+        :exec-args {:dirs ["src"]}
+        }
+         }}

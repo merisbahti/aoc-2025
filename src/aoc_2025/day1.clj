@@ -1,9 +1,28 @@
 (ns aoc-2025.day1
   (:require
    [clojure.math :as math]
+   [malli.clj-kondo :as mc]
+
+   [malli.core :as m]
+   [malli.dev :as md]
+
    [clojure.string :as str]
    [clojure.test :refer [is testing deftest]]
    [aoc-2025.core :refer [get-input-for-day]]))
+
+(defn square [x] (* x x))
+(m/=> square [:=> [:cat int?] nat-int?])
+
+(defn plus
+  ([x] x)
+  ([x y] (+ x y)))
+
+(m/=> plus [:function
+            [:=> [:cat int?] int?]
+            [:=> [:cat int? int?] int?]])
+(plus "a")
+(comment)
+(mc/emit!)
 
 (def input (get-input-for-day))
 (def testinput "L68

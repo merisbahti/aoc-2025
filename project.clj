@@ -5,6 +5,7 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.12.3"]
                  [org.clojure/math.combinatorics "0.3.0"]
-                 [org.clojure/spec.alpha "0.5.238"]]
+                 [org.clojure/spec.alpha "0.5.238"]
+                 [metosin/malli "0.20.0"]]
   :test-paths ["src"]
   :repl-options {:init-ns aoc-2025.core})
