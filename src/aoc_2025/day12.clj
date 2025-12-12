@@ -38,16 +38,9 @@
 12x5: 1 0 1 0 2 2
 12x5: 1 0 1 0 3 2")
 (def input (str/trim (get-input-for-day)))
-(filter (partial = \#) (seq "###aa"))
 
 (defn sol1 [input]
   (->> (let [parts (str/split input #"\n\n")
-             shape-sizes
-             (->> (drop-last parts)
-                  (seq)
-                  (map #(filter (partial = \#) %))
-                  (map count)
-                  (into []))
              rows-str (str/split-lines (last parts))
              rows-parsed (map (fn [row-str]
                                 (let [[size-unparsed present-counts-unparsed] (str/split row-str #": ")
@@ -60,8 +53,7 @@
          (->> (map (fn [[[size-x size-y] present-counts]] (>
 
                                                            (* size-x size-y)
-                                                           (->> (map-indexed (fn [i count]
-                                                                               (* (shape-sizes i) count)) present-counts)
+                                                           (->> (map (fn [count] (* 8 count)) present-counts)
                                                                 (apply +))))
 
                    rows-parsed)
@@ -72,7 +64,7 @@
 
 (deftest input-tests
   (testing "part 1"
-    ;; (is (= nil (sol1 testinput)))
+    (is (= 2 (sol1 testinput)))
     (is (= 505 (sol1 input)))
     (is (= nil (sol2 testinput)))
     (is (= nil (sol2 input)))))
