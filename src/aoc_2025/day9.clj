@@ -28,13 +28,18 @@
                                 (+ 1 (abs (- y1 y2))))))
                         (apply max)))
 
-(defn draw-input [points]
-  (let [min-y (apply min (map second points))
-        max-y (apply max (map second points))
-        min-x (apply min (map first points))
-        max-x (apply max (map first points))
-        points-set (set points)]
-    (println points-set)
+(defn draw-input [ranges]
+  (let [min-y (-  (apply min (map first ranges)) 1)
+        max-y (+ 1 (apply max (map first ranges)))
+        xs (set (mapcat second ranges))
+        min-x (-  (apply min xs) 2)
+        max-x (+ 2 (apply max xs))
+        points-set (set (mapcat (fn [[y [min-x max-x]]]
+                                  (map (fn [x] [x y])
+                                       (range min-x (inc max-x)))) ranges))]
+    (force (map println ranges))
+    (println "ranges" ranges)
+    (println xs min-x max-x min-y max-y points-set)
     (doseq [y (range min-y (+ 1 max-y))]
       (doseq [x (range min-x (+ 1 max-x))]
         (if (points-set [x y])
@@ -65,15 +70,18 @@
                 (cond
                   (= prev-min-x curr-max-x) [curr-y [curr-min-x prev-max-x]]
                   (= prev-min-x curr-min-x) [curr-y [curr-max-x prev-max-x]]
+
                   :else (assert false))
                 curr-range)
-              added-ranges nil]
+              added-ranges  (when prev-range (map (fn [y]
+                                                    [y [prev-min-x prev-max-x]]) (range prev-y (inc curr-y))))]
 
           {:prev-range new-range
-           :ranges (cons new-range ranges)}))
-      {:prev-range nil :ranges nil})
+           :ranges (concat (reverse added-ranges) ranges)}))
+      {:prev-range nil :ranges []})
      (:ranges)
      (reverse)
+     (draw-input)
 
 ;; (mapcat
      ;;  (fn [[k [from to]]]
