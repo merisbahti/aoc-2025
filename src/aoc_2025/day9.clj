@@ -1,4 +1,4 @@
-(ns aoc-2025.template
+(ns aoc-2025.day9
   (:require
    [aoc-2025.core :refer [get-input-for-day]]
    [clojure.string :as str]
@@ -28,24 +28,60 @@
                                 (+ 1 (abs (- y1 y2))))))
                         (apply max)))
 
+(defn draw-input [points]
+  (let [min-y (apply min (map second points))
+        max-y (apply max (map second points))
+        min-x (apply min (map first points))
+        max-x (apply max (map first points))
+        points-set (set points)]
+    (println points-set)
+    (doseq [y (range min-y (+ 1 max-y))]
+      (doseq [x (range min-x (+ 1 max-x))]
+        (if (points-set [x y])
+          (print "#")
+          (print ".")))
+      (println))))
+
 (->> testinput
      (str/split-lines)
      (map #(str/split % #","))
      (map (fn [[x y]] [(parse-long x) (parse-long y)]))
      ((fn [points]
         (let [sorted-by-ys (->> (sort-by (juxt second first) points) (into []))
-              x-ranges (->> (map
+              x-ranges (->> (range 0 (+  (/ (count points) 2)))
+                            (map
                              (fn [i]
                                (let [[low-x low-y] (get sorted-by-ys (* 2 i))
                                      [high-x high-y] (get sorted-by-ys (inc (* 2 i)))]
                                  (assert (= low-y high-y))
-                                 [low-y [low-x high-x]]))
+                                 [low-y [low-x high-x]]))))]
 
-                             (range 0 (+  (/ (count points) 2))))
-                            (into {}))]
+          x-ranges)))
+     (reduce
+      (fn [{[prev-y [prev-min-x prev-max-x] :as prev-range] :prev-range ranges :ranges}
+           [curr-y [curr-min-x curr-max-x] :as curr-range]]
+        (let [new-range
+              (if prev-range
+                (cond
+                  (= prev-min-x curr-max-x) [curr-y [curr-min-x prev-max-x]]
+                  (= prev-min-x curr-min-x) [curr-y [curr-max-x prev-max-x]]
+                  :else (assert false))
+                curr-range)
+              added-ranges nil]
 
-          x-ranges))))
+          {:prev-range new-range
+           :ranges (cons new-range ranges)}))
+      {:prev-range nil :ranges nil})
+     (:ranges)
+     (reverse)
 
+;; (mapcat
+     ;;  (fn [[k [from to]]]
+     ;;    (map (fn [x] [x k])
+     ;;         (range from (+ 1 to)))))
+     ;; (sort-by second)
+     ;; (draw-input)
+     )
 (defn sol2 [input] nil)
 
 (deftest input-tests
