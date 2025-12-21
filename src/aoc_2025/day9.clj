@@ -37,9 +37,6 @@
         points-set (set (mapcat (fn [[y [min-x max-x]]]
                                   (map (fn [x] [x y])
                                        (range min-x (inc max-x)))) ranges))]
-    (force (map println ranges))
-    (println "ranges" ranges)
-    (println xs min-x max-x min-y max-y points-set)
     (doseq [y (range min-y (+ 1 max-y))]
       (doseq [x (range min-x (+ 1 max-x))]
         (if (points-set [x y])
