@@ -14,14 +14,6 @@
 2,5
 2,3
 7,3")
-(def testinput2 "2,1
-6,1
-6,3
-11,3
-4,5
-11,5
-2,7
-4,7")
 
 (def input (get-input-for-day))
 
@@ -36,67 +28,59 @@
                                 (+ 1 (abs (- y1 y2))))))
                         (apply max)))
 
-(defn draw-input [ranges]
-  (let [min-y (-  (apply min (map first ranges)) 1)
-        max-y (+ 1 (apply max (map first ranges)))
-        xs (set (mapcat second ranges))
-        min-x (-  (apply min xs) 2)
-        max-x (+ 2 (apply max xs))
-        points-set (set (mapcat (fn [[y [min-x max-x]]]
-                                  (map (fn [x] [x y])
-                                       (range min-x (inc max-x)))) ranges))]
-    (doseq [y (range min-y (+ 1 max-y))]
-      (doseq [x (range min-x (+ 1 max-x))]
-        (if (points-set [x y])
+(defn draw-grid [points]
+  (let [maxX (apply max (map first points))
+        maxY (apply max (map second points))]
+    (doseq [y (range (inc maxY))]
+      (doseq [x (range (inc maxX))]
+        (if (some #(and (= x (first %)) (= y (second %))) points)
           (print "#")
           (print ".")))
       (println))))
 
-(->> testinput2
+(let [arr [1 2 3]]
+  (arr (mod 3 (count arr))))
+(defn rasterize [points]
+  ;; is clojure array
+  (assert (vector? points))
+  (->> points
+       (map-indexed (fn [& rest] rest))
+       (mapcat
+        (fn [[index pointA]]
+          (let [[fromX fromY] pointA
+                [toX toY] (points (mod (+ 1 index) (count points)))]
+            (cond
+              (= fromX toX) (map (fn [y] [fromX y])
+                                 (let [vs [fromY toY]
+                                       minV (apply min vs)
+                                       maxV (apply max vs)]
+
+                                   (range minV (+ 1 maxV))))
+
+              (= fromY toY) (map (fn [x] [x fromY])
+                                 (let [vs [fromX toX]
+                                       minV (apply min vs)
+                                       maxV (apply max vs)]
+
+                                   (range minV (+ 1 maxV))))
+              :else (throw (Exception. "Diagonal line not supported"))))))))
+(range -2 1)
+(->> testinput
      (str/split-lines)
      (map #(str/split % #","))
-     (map (fn [[x y]] [(parse-long x) (parse-long y)]))
+     (map (juxt (comp parse-long first) (comp parse-long second)))
+     (into [])
      ((fn [points]
-        (let [sorted-by-ys (->> (sort-by (juxt second first) points) (into []))
-              x-ranges (->> (range 0 (+  (/ (count points) 2)))
-                            (map
-                             (fn [i]
-                               (let [[low-x low-y] (get sorted-by-ys (* 2 i))
-                                     [high-x high-y] (get sorted-by-ys (inc (* 2 i)))]
-                                 (assert (= low-y high-y))
-                                 [low-y [low-x high-x]]))))]
+        (let [uniqX (->> points (map first) (set) (sort) (map-indexed (fn [i x] [x i])))
+              uniqY (->> points (map second) (set) (sort) (map-indexed (fn [i x] [x i])))
+              xMap (into {} uniqX)
+              yMap (into {} uniqY)
+              initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))]
+          (println "hi")
+          (draw-grid initialGrid)
+          (println "hi")
+          (draw-grid (rasterize initialGrid))))))
 
-          x-ranges)))
-     (reduce
-      (fn [{[prev-y [prev-min-x prev-max-x] :as prev-range] :prev-range ranges :ranges}
-           [curr-y [curr-min-x curr-max-x] :as curr-range]]
-        (let [new-range
-              (if prev-range
-                (cond
-                  (= prev-min-x curr-max-x) [curr-y [curr-min-x prev-max-x]]
-                  (= prev-min-x curr-min-x) [curr-y [curr-max-x prev-max-x]]
-                  (= prev-max-x curr-max-x) (assert false "lol") ;; [curr-y [ curr-max-x prev-max-x]]
-                  (= prev-max-x curr-min-x) (assert false "lol")
-
-                  :else (assert false (str prev-range curr-range)))
-                curr-range)
-              added-ranges  (when prev-range (map (fn [y]
-                                                    [y [prev-min-x prev-max-x]]) (range prev-y (inc curr-y))))]
-
-          {:prev-range new-range
-           :ranges (concat (reverse added-ranges) ranges)}))
-      {:prev-range nil :ranges []})
-     (:ranges)
-     (reverse)
-     (draw-input)
-
-;; (mapcat
-     ;;  (fn [[k [from to]]]
-     ;;    (map (fn [x] [x k])
-     ;;         (range from (+ 1 to)))))
-     ;; (sort-by second)
-     ;; (draw-input)
-     )
 (defn sol2 [input] nil)
 
 (deftest input-tests
