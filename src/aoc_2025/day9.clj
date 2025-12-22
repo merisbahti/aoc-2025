@@ -14,6 +14,14 @@
 2,5
 2,3
 7,3")
+(def testinput2 "2,1
+6,1
+6,3
+11,3
+4,5
+11,5
+2,7
+4,7")
 
 (def input (get-input-for-day))
 
@@ -44,7 +52,7 @@
           (print ".")))
       (println))))
 
-(->> testinput
+(->> testinput2
      (str/split-lines)
      (map #(str/split % #","))
      (map (fn [[x y]] [(parse-long x) (parse-long y)]))
@@ -67,8 +75,10 @@
                 (cond
                   (= prev-min-x curr-max-x) [curr-y [curr-min-x prev-max-x]]
                   (= prev-min-x curr-min-x) [curr-y [curr-max-x prev-max-x]]
+                  (= prev-max-x curr-max-x) (assert false "lol") ;; [curr-y [ curr-max-x prev-max-x]]
+                  (= prev-max-x curr-min-x) (assert false "lol")
 
-                  :else (assert false))
+                  :else (assert false (str prev-range curr-range)))
                 curr-range)
               added-ranges  (when prev-range (map (fn [y]
                                                     [y [prev-min-x prev-max-x]]) (range prev-y (inc curr-y))))]
