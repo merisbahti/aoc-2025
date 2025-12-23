@@ -65,23 +65,14 @@
               :else (throw (Exception. "Diagonal line not supported"))))))))
 
 (defn flood-fill [startX startY grid]
-  (let [directions [[0 1] [1 0] [0 -1] [-1 0]]
-        grid-set   (into #{} grid)
-        ;; derive bounds from the boundary itself
-        xs         (map first grid)
-        ys         (map second grid)
-        min-x      (apply min xs)
-        max-x      (apply max xs)
-        min-y      (apply min ys)
-        max-y      (apply max ys)
-        in-bounds? (fn [[x y]] (and (<= min-x x max-x) (<= min-y y max-y)))]
+  (let [directions [[0 1] [1 0] [0 -1] [-1 0]]]
     (loop [stack   [[startX startY]]
-           visited grid-set]
+           visited (into #{} grid)]
       (if (empty? stack)
         visited
         (let [[x y]       (first stack)
               candidates  (map (fn [[dX dY]] [(+ x dX) (+ y dY)]) directions)
-              not-visited (filterv #(and (in-bounds? %) (not (visited %))) candidates)]
+              not-visited (filterv (complement visited) candidates)]
           (recur
            (into (rest stack) not-visited)
            (conj visited [x y])))))))
