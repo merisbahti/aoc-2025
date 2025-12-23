@@ -2,7 +2,7 @@
   (:require
    [aoc-2025.core :refer [get-input-for-day]]
    [clojure.string :as str]
-
+   [clojure.math :as math]
    [clojure.test :refer [deftest is testing]]
    [clojure.math.combinatorics :as combo]))
 
@@ -41,7 +41,6 @@
 (let [arr [1 2 3]]
   (arr (mod 3 (count arr))))
 (defn rasterize [points]
-  ;; is clojure array
   (assert (vector? points))
   (->> points
        (map-indexed (fn [& rest] rest))
@@ -64,8 +63,30 @@
 
                                    (range minV (+ 1 maxV))))
               :else (throw (Exception. "Diagonal line not supported"))))))))
-(range -2 1)
-(->> testinput
+
+(defn flood-fill [startX startY grid]
+  (let [directions [[0 1] [1 0] [0 -1] [-1 0]]
+        grid-set   (into #{} grid)
+        ;; derive bounds from the boundary itself
+        xs         (map first grid)
+        ys         (map second grid)
+        min-x      (apply min xs)
+        max-x      (apply max xs)
+        min-y      (apply min ys)
+        max-y      (apply max ys)
+        in-bounds? (fn [[x y]] (and (<= min-x x max-x) (<= min-y y max-y)))]
+    (loop [stack   [[startX startY]]
+           visited grid-set]
+      (if (empty? stack)
+        visited
+        (let [[x y]       (first stack)
+              candidates  (map (fn [[dX dY]] [(+ x dX) (+ y dY)]) directions)
+              not-visited (filterv #(and (in-bounds? %) (not (visited %))) candidates)]
+          (recur
+           (into (rest stack) not-visited)
+           (conj visited [x y])))))))
+
+(->> input
      (str/split-lines)
      (map #(str/split % #","))
      (map (juxt (comp parse-long first) (comp parse-long second)))
@@ -75,11 +96,11 @@
               uniqY (->> points (map second) (set) (sort) (map-indexed (fn [i x] [x i])))
               xMap (into {} uniqX)
               yMap (into {} uniqY)
-              initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))]
-          (println "hi")
-          (draw-grid initialGrid)
-          (println "hi")
-          (draw-grid (rasterize initialGrid))))))
+              initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))
+              allowedPoints (->> initialGrid
+                                 (rasterize)
+                                 (flood-fill 128 22)
+                                 (into #{}))]))))
 
 (defn sol2 [input] nil)
 
