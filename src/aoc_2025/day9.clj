@@ -92,7 +92,7 @@
            (into (rest stack) not-visited)
            (conj visited [x y])))))))
 
-(->> testinput
+(->> input
      (str/split-lines)
      (map #(str/split % #","))
      (map (juxt (comp parse-long first) (comp parse-long second)))
@@ -104,11 +104,29 @@
               yMap (into {} uniqY)
               initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))
 
-              allowedPoints (->> initialGrid
-                                 (rasterize)
-                                 (flood-fill)
-                                 (into #{}))]
-          (draw-grid allowedPoints)))))
+              allowedGrid (->> initialGrid
+                               (rasterize)
+                               (flood-fill)
+                               (into #{}))
+              candidateAreas (->>
+                              points
+                              (#(combo/combinations % 2))
+                              (filter (fn [[[x1 y1] [x2 y2]]]
+                                        (let [p1 [(xMap x1) (yMap y1)]
+                                              p2 [(xMap x2) (yMap y2)]
+                                              p3 [(first p1) (second p2)]
+                                              p4 [(first p2) (second p1)]
+                                              shape-grid (rasterize [p1 p3 p2 p4])]
+
+                                          (every? allowedGrid shape-grid))))
+
+                              (map
+                               (fn [[[x1 y1] [x2 y2]]]
+                                 (*
+                                  (+ 1 (abs (- x1 x2)))
+                                  (+ 1 (abs (- y1 y2)))))))]
+
+          (apply max candidateAreas)))))
 
 (defn sol2 [input] nil)
 
