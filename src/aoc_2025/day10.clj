@@ -2,6 +2,8 @@
   (:require
    [aoc-2025.core :refer [get-input-for-day]]
    [clojure.string :as str]
+   [loco.core :as loco]
+   [loco.constraints :as lc]
    [clojure.test :refer [deftest is testing]]
    [clojure.math.combinatorics :as combo]))
 
@@ -58,6 +60,21 @@
                   (apply min-key count))))
           (map count)
           (apply +)))
+
+;; (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+
+(loco/solution
+ [(lc/$in [:x 0] 0 100)
+  (lc/$in [:x 1] 0 100)
+  (lc/$in [:x 2] 0 100)
+  (lc/$in [:x 3] 0 100)
+  (lc/$in [:x 4] 0 100)
+  (lc/$in [:x 5] 0 100)
+  (lc/$= (lc/$+ [:x 4] [:x 5]) 3)
+  (lc/$= (lc/$+ [:x 1] [:x 5]) 5)
+  (lc/$= (lc/$+ [:x 2] [:x 3] [:x 4]) 4)
+  (lc/$= (lc/$+ [:x 0] [:x 1] [:x 3]) 7)
+  (lc/$min (lc/$+ [:x 0] [:x 1] [:x 2] [:x 3] [:x 4] [:x 5]))])
 
 (defn sol1 [input]
   (->>
