@@ -92,47 +92,46 @@
            (into (rest stack) not-visited)
            (conj visited [x y])))))))
 
-(->> input
-     (str/split-lines)
-     (map #(str/split % #","))
-     (map (juxt (comp parse-long first) (comp parse-long second)))
-     (into [])
-     ((fn [points]
-        (let [uniqX (->> points (map first) (set) (sort) (map-indexed (fn [i x] [x i])))
-              uniqY (->> points (map second) (set) (sort) (map-indexed (fn [i x] [x i])))
-              xMap (into {} uniqX)
-              yMap (into {} uniqY)
-              initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))
+(defn sol2 [input]
+  (->> input
+       (str/split-lines)
+       (map #(str/split % #","))
+       (map (juxt (comp parse-long first) (comp parse-long second)))
+       (into [])
+       ((fn [points]
+          (let [uniqX (->> points (map first) (set) (sort) (map-indexed (fn [i x] [x i])))
+                uniqY (->> points (map second) (set) (sort) (map-indexed (fn [i x] [x i])))
+                xMap (into {} uniqX)
+                yMap (into {} uniqY)
+                initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))
 
-              allowedGrid (->> initialGrid
-                               (rasterize)
-                               (flood-fill)
-                               (into #{}))
-              candidateAreas (->>
-                              points
-                              (#(combo/combinations % 2))
-                              (filter (fn [[[x1 y1] [x2 y2]]]
-                                        (let [p1 [(xMap x1) (yMap y1)]
-                                              p2 [(xMap x2) (yMap y2)]
-                                              p3 [(first p1) (second p2)]
-                                              p4 [(first p2) (second p1)]
-                                              shape-grid (rasterize [p1 p3 p2 p4])]
+                allowedGrid (->> initialGrid
+                                 (rasterize)
+                                 (flood-fill)
+                                 (into #{}))
+                candidateAreas (->>
+                                points
+                                (#(combo/combinations % 2))
+                                (filter (fn [[[x1 y1] [x2 y2]]]
+                                          (let [p1 [(xMap x1) (yMap y1)]
+                                                p2 [(xMap x2) (yMap y2)]
+                                                p3 [(first p1) (second p2)]
+                                                p4 [(first p2) (second p1)]
+                                                shape-grid (rasterize [p1 p3 p2 p4])]
 
-                                          (every? allowedGrid shape-grid))))
+                                            (every? allowedGrid shape-grid))))
 
-                              (map
-                               (fn [[[x1 y1] [x2 y2]]]
-                                 (*
-                                  (+ 1 (abs (- x1 x2)))
-                                  (+ 1 (abs (- y1 y2)))))))]
+                                (map
+                                 (fn [[[x1 y1] [x2 y2]]]
+                                   (*
+                                    (+ 1 (abs (- x1 x2)))
+                                    (+ 1 (abs (- y1 y2)))))))]
 
-          (apply max candidateAreas)))))
-
-(defn sol2 [input] nil)
+            (apply max candidateAreas))))))
 
 (deftest input-tests
   (testing "part 1"
     (is (= 50 (sol1 testinput)))
     (is (= 4748826374 (sol1 input)))
-    (is (= nil (sol2 testinput)))
-    (is (= nil (sol2 input)))))
+    (is (= 24 (sol2 testinput)))
+    (is (= 1554370486 (sol2 input)))))
