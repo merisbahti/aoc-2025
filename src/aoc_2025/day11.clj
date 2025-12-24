@@ -2,6 +2,7 @@
   (:require
    [aoc-2025.core :refer [get-input-for-day]]
    [clojure.string :as str]
+
    [clojure.test :refer [deftest is testing]]))
 
 (def testinput "aaa: you hhh
@@ -17,15 +18,16 @@ iii: out")
 
 (def input (get-input-for-day))
 
-(def find-paths (fn [[head-path :as curr-path] graph]
-                  (assert (not= nil head-path))
-                  (let [paths (head-path graph)]
-                    (if (nil? paths)
-                      [(reverse curr-path)]
-                      (mapcat
-                       (fn [k]
-                         (find-paths (cons k curr-path) graph))
-                       paths)))))
+(def find-paths
+  (memoize
+   (fn [from to graph]
+     (if (= from to)
+       [[to]]
+       (mapcat
+        (fn [option]
+          (let [paths (find-paths option to graph)]
+            (when (seq paths) (map (fn [path] (cons from path)) paths))))
+        (graph from))))))
 
 (defn sol1 [input]
   (->> (str/split-lines input)
@@ -34,7 +36,7 @@ iii: out")
                     values (str/split (first valuestring) #" ")]
                 [(keyword key) (map keyword values)])))
        (into {})
-       (find-paths [:you])
+       (find-paths :you :out)
        (count)))
 
 (def test-input-2 "svr: aaa bbb
@@ -51,9 +53,6 @@ fff: ggg hhh
 ggg: out
 hhh: out
 ")
-(def dacset #{:dac})
-(def fftset #{:fft})
-(defn filterfn [path] (and (some dacset  path) (some fftset path)))
 
 (defn sol2 [input]
   (->> (str/split-lines input)
@@ -62,14 +61,20 @@ hhh: out
                     values (str/split (first valuestring) #" ")]
                 [(keyword key) (map keyword values)])))
        (into {})
-       (find-paths [:svr])
-       (filter filterfn)
-       (count)))
+
+       ((fn [graph]
+          (let [svr-fft (find-paths :svr :fft graph)
+                fft-dac (find-paths :fft :dac graph)
+                dac-out (find-paths :dac :out graph)]
+
+            (*
+             (count svr-fft)
+             (count fft-dac)
+             (count dac-out)))))))
 
 (deftest input-tests
   (testing "part 1"
     (is (= 5 (sol1 testinput)))
     (is (= 413 (sol1 input)))
     (is (= 2 (sol2 test-input-2)))
-    ;; (is (= nil (sol2 input)))
-    ))
+    (is (= 525518050323600 (sol2 input)))))
