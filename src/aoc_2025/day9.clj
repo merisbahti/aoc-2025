@@ -77,9 +77,9 @@
         grid-set (into #{} grid)]
 
     (loop [stack   [[minX minY]]
-           visited (into #{} grid)]
+           visited #{}]
       (if (empty? stack)
-        visited
+        (filter (complement visited) (for [x (range minX maxX) y (range minY maxY)] [x y]))
         (let [[x y]       (first stack)
               candidates  (map (fn [[dX dY]] [(+ x dX) (+ y dY)]) directions)
               not-visited (filterv (fn [point]
@@ -92,7 +92,7 @@
            (into (rest stack) not-visited)
            (conj visited [x y])))))))
 
-(->> input
+(->> testinput
      (str/split-lines)
      (map #(str/split % #","))
      (map (juxt (comp parse-long first) (comp parse-long second)))
@@ -103,12 +103,12 @@
               xMap (into {} uniqX)
               yMap (into {} uniqY)
               initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))
-              point-inside ()
+
               allowedPoints (->> initialGrid
                                  (rasterize)
-                                 (flood-fill 128 22)
+                                 (flood-fill)
                                  (into #{}))]
-          point-inside))))
+          (draw-grid allowedPoints)))))
 
 (defn sol2 [input] nil)
 
