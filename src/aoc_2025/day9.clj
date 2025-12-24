@@ -65,15 +65,29 @@
                                    (range minV (+ 1 maxV))))
               :else (throw (Exception. "Diagonal line not supported"))))))))
 
-(defn flood-fill [startX startY grid]
-  (let [directions [[0 1] [1 0] [0 -1] [-1 0]]]
-    (loop [stack   [[startX startY]]
+(defn flood-fill [grid]
+  (let [directions [[0 1] [1 0] [0 -1] [-1 0]]
+        xs (map first grid)
+        ys (map second grid)
+        minX (- (apply min xs) 1)
+        maxX (+ (apply max xs) 1)
+        minY (- (apply min ys) 1)
+        maxY (+ (apply max ys) 1)
+        outside-bounds (fn [[x y]] (or (< x minX) (> x maxX) (< y minY) (> y maxY)))
+        grid-set (into #{} grid)]
+
+    (loop [stack   [[minX minY]]
            visited (into #{} grid)]
       (if (empty? stack)
         visited
         (let [[x y]       (first stack)
               candidates  (map (fn [[dX dY]] [(+ x dX) (+ y dY)]) directions)
-              not-visited (filterv (complement visited) candidates)]
+              not-visited (filterv (fn [point]
+                                     (not (or
+                                           (grid-set point)
+                                           (outside-bounds point)
+                                           (visited point))))
+                                   candidates)]
           (recur
            (into (rest stack) not-visited)
            (conj visited [x y])))))))
@@ -89,10 +103,12 @@
               xMap (into {} uniqX)
               yMap (into {} uniqY)
               initialGrid (into [] (map (fn [[x y]] [(xMap x) (yMap y)]) points))
+              point-inside ()
               allowedPoints (->> initialGrid
                                  (rasterize)
                                  (flood-fill 128 22)
-                                 (into #{}))]))))
+                                 (into #{}))]
+          point-inside))))
 
 (defn sol2 [input] nil)
 
