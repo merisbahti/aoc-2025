@@ -29,17 +29,18 @@
                         (apply max)))
 
 (defn draw-grid [points]
-  (let [maxX (apply max (map first points))
-        maxY (apply max (map second points))]
-    (doseq [y (range (inc maxY))]
-      (doseq [x (range (inc maxX))]
-        (if (some #(and (= x (first %)) (= y (second %))) points)
+  (let [minX (apply min (map first points))
+        minY (apply min (map second points))
+        maxX (apply max (map first points))
+        maxY (apply max (map second points))
+        point-set (set points)]
+    (doseq [y (range minY (inc maxY))]
+      (doseq [x (range minX (inc maxX))]
+        (if (point-set [x y])
           (print "#")
           (print ".")))
       (println))))
 
-(let [arr [1 2 3]]
-  (arr (mod 3 (count arr))))
 (defn rasterize [points]
   (assert (vector? points))
   (->> points
