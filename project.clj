@@ -8,6 +8,7 @@
                  [org.clojure/math.combinatorics "0.3.0"]
                  [org.clojure/spec.alpha "0.5.238"]
                  [metosin/malli "0.20.0"]
-                 [loco "0.3.1"]]
+                 [loco "0.3.1"]
+                 [tools.aqua/z3-turnkey "4.14.1"]]
   :test-paths ["src"]
   :repl-options {:init-ns aoc-2025.core})
