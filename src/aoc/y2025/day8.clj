@@ -1,6 +1,6 @@
-(ns aoc-2025.day8
+(ns aoc.y2025.day8
   (:require
-   [aoc-2025.core :refer [get-input-for-day]]
+   [aoc.core :refer [get-input-for-day]]
    [clojure.math :as math]
    [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]

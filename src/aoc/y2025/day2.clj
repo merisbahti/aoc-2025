@@ -1,8 +1,8 @@
-(ns aoc-2025.day2
+(ns aoc.y2025.day2
   (:require
    [clojure.string :as str]
    [clojure.test :refer [is testing deftest]]
-   [aoc-2025.core :refer [get-input-for-day]]))
+   [aoc.core :refer [get-input-for-day]]))
 
 (def input (get-input-for-day))
 (def testinput "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,

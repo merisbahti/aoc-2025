@@ -11,4 +11,4 @@
                  [loco "0.3.1"]
                  [tools.aqua/z3-turnkey "4.14.1"]]
   :test-paths ["src"]
-  :repl-options {:init-ns aoc-2025.core})
+  :repl-options {:init-ns aoc.core})

@@ -1,4 +1,4 @@
-(ns aoc-2025.day1
+(ns aoc.y2025.day1
   (:require
    [clojure.math :as math]
    [malli.clj-kondo :as mc]
@@ -8,7 +8,7 @@
 
    [clojure.string :as str]
    [clojure.test :refer [is testing deftest]]
-   [aoc-2025.core :refer [get-input-for-day]]))
+   [aoc.core :refer [get-input-for-day]]))
 
 (defn square [x] (* x x))
 (m/=> square [:=> [:cat int?] nat-int?])
