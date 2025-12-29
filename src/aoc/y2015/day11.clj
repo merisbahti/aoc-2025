@@ -48,15 +48,13 @@
   (not (re-find #"[iol]" str)))
 
 (defn sol1 [input]
-  (loop [nr (+ 1 (str-to-base-26 input))
-         limit 1000000]
-    (let [curr-str (nr-to-chars nr)]
-      (assert (> limit 0) "Limit reached withqout finding valid password")
-      (if (and (has-increasing-chars? curr-str)
-               (has-two-repeated-nrs? curr-str)
-               (doesnt-contain-iol? curr-str))
-        curr-str
-        (recur (+ 1 nr) (- limit 1))))))
+  (let [base-nr (str-to-base-26 input)]
+    (->> (range 1 1000000) (map (fn [x] (nr-to-chars (+ x base-nr))))
+         (filter (fn [curr-str]
+                   (and (has-increasing-chars? curr-str)
+                        (has-two-repeated-nrs? curr-str)
+                        (doesnt-contain-iol? curr-str))))
+         (first))))
 
 (deftest input-tests
   (testing "part 1"
