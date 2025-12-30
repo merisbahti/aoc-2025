@@ -9,8 +9,44 @@
 (def testinput3 "^v^v^v^v^v")
 (def input (get-input-for-day))
 
-(defn sol1 [input] nil)
-(defn sol2 [input] nil)
+(defn sol1 [input]
+  (->> (str/split input #"")
+       (reduce (fn [[[x y] visited] move]
+                 (let [next-pos
+                       (case move
+                         "^" [x (+ 1 y)]
+                         "v" [x (+ -1 y)]
+                         "<" [(+ -1 x) y]
+                         ">" [(+ 1 x) y])]
+                   [next-pos (into visited [next-pos])]))
+               [[0 0] #{}])
+
+       (second)
+       (count)))
+(defn calc-pos [[x y] move]
+  (case move
+    "^" [x (+ 1 y)]
+    "v" [x (+ -1 y)]
+    "<" [(+ -1 x) y]
+    ">" [(+ 1 x) y]))
+(defn sol2 [input]
+  (->> (str/split input #"")
+       (reduce (fn [[apos bpos aturn visited] move]
+                 (let [next-a
+                       (if aturn
+                         (calc-pos apos move)
+                         apos)
+                       next-b
+                       (if-not aturn (calc-pos bpos move)
+                               bpos)
+                       next-aturn (not aturn)]
+
+                   [next-a next-b next-aturn (into visited [next-a next-b])]))
+               [[0 0] [0 0] true #{}])
+
+       (drop 3)
+       (first)
+       (count)))
 
 (deftest input-tests
   (testing "part 1"
