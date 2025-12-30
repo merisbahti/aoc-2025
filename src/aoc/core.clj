@@ -18,7 +18,7 @@
                (str "y" year "/" filename)
                filename)]
     `(if-let [file# (io/resource ~path)]
-       (slurp file#)
+       (str/trim (slurp file#))
        (let [resources-path# (io/file "resources" ~path)
              dir# (.getParentFile resources-path#)]
          (when-not (.exists dir#)
