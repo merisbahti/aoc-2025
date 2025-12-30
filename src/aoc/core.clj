@@ -19,4 +19,10 @@
                filename)]
     `(if-let [file# (io/resource ~path)]
        (slurp file#)
-       (throw (Exception. (str "File not found, looked at: " ~path))))))
+       (let [resources-path# (io/file "resources" ~path)
+             dir# (.getParentFile resources-path#)]
+         (when-not (.exists dir#)
+           (.mkdirs dir#))
+         (when-not (.exists resources-path#)
+           (spit resources-path# ""))
+         (slurp resources-path#)))))
