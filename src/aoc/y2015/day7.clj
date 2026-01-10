@@ -1,0 +1,56 @@
+(ns aoc.y2015.day7
+  (:require
+   [aoc.core :refer [get-input-for-day]]
+   [clojure.string :as str]
+   [clojure.test :refer [deftest is testing]]
+   [clojure.math :as math]))
+
+(def testinput "123 -> x
+456 -> y
+x AND y -> d
+x OR y -> e
+x LSHIFT 2 -> f
+y RSHIFT 2 -> g
+NOT x -> h
+NOT y -> i")
+
+(defn flip-all [nr] (reduce (fn [acc curr] (bit-flip acc curr)) nr (range 0 16)))
+
+(def input (get-input-for-day))
+
+(defn sol1 [input to-eval]
+  (let [exprs (->>
+               (str/split-lines input)
+               (mapv (fn [line]
+                       (->> (str/split line #" -> ")
+                            (reverse)
+                            (into []))))
+               (into {}))
+        eval-expr (memoize
+                   (fn eval-expr [expr]
+                     (prn "evaling " expr)
+                     (condp re-matches expr
+                       #"^(\d+)$" :>> (fn [[_ _]] (parse-long expr))
+                       #"^([a-z]+)$" :>> (fn [[_ _]] (eval-expr (exprs expr)))
+                       #"(\w+)\s+AND\s+(\w+)" :>> (fn [[_ a b]] (bit-and (eval-expr a) (eval-expr b)))
+                       #"(\w+)\s+LSHIFT\s+(\w+)" :>> (fn [[_ a b]] (bit-shift-left (eval-expr a) (eval-expr b)))
+                       #"(\w+)\s+RSHIFT\s+(\w+)" :>> (fn [[_ a b]] (bit-shift-right (eval-expr a) (eval-expr b)))
+                       #"NOT\s+(\w+)" :>> (fn [[_ a]] (flip-all (eval-expr a)))
+                       #"(\w+)\s+OR\s+(\w+)" :>> (fn [[_ a b]] (bit-or (eval-expr a) (eval-expr b))))))]
+
+    (eval-expr to-eval)))
+(defn sol2 [input] nil)
+
+(deftest input-tests
+  (testing "part 1"
+    (is (= 65412 (sol1 testinput "h")))
+    (is (= 123 (sol1 testinput "x")))
+    (is (= 456 (sol1 testinput "y")))
+    (is (= 492 (sol1 testinput "f")))
+    (is (= 114 (sol1 testinput "g")))
+    (is (= 72 (sol1 testinput "d")))
+    (is (= 507 (sol1 testinput "e")))
+
+    ;; (is (= nil (sol1 input)))
+    (is (= nil (sol2 testinput)))
+    (is (= nil (sol2 input)))))
